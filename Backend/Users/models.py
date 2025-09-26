@@ -24,7 +24,7 @@ class VerificationToken(models.Model):
         on_delete=models.CASCADE,
         related_name="verification_tokens",
     )
-    token = models.CharField(max_length=6, blank=True, null=True)
+    v_token = models.CharField(max_length=6, blank=True, null=True)
     expiry = models.DateTimeField()
 
     def is_expired(self):
@@ -38,7 +38,7 @@ class ResetToken(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reset_tokens"
     )
-    token = models.CharField(max_length=255, blank=True)
+    r_token = models.CharField(max_length=255, blank=True)
     expiry = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):

@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import sys
 from pathlib import Path
 
-# from datetime import timedelta
+from datetime import timedelta
 import socket
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,7 +31,7 @@ SECRET_KEY = "django-insecure-4apel#e+*3a5$p(@m8n=3ahuh2%o3_59f#5r_2onygr_z)*cu+
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.43.234"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.43.234", "0.0.0.0"]
 
 try:
     ip = socket.gethostbyname(socket.gethostname())
@@ -39,13 +39,28 @@ try:
 except Exception:
     pass
 
+
+# Celery + Redis
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 # Development only
 # CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = False  # Set to True in production
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = "Lax"
 
 FRONTEND_BASE_URL = "http://192.168.43.234:3001"
+
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
+SESSION_SAVE_EVERY_REQUEST = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3001",  # React frontend
@@ -72,10 +87,11 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     # "widget_tweaks",
     "Users",
     "Converter",
-    "Editor",
+    "TTSStudio",
     "Subscription",
 ]
 
@@ -89,6 +105,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "EchoVerse.urls"
@@ -124,15 +141,17 @@ if "test" in sys.argv:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
+            "NAME": "sqlite3.db",
         }
     }
 else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "EchoVerse",
-            "USER": "skye",
+            "NAME": "echoverse",
+            "PASSWORD": "echoverse@skye@dragon17",
+            "USER": "echoverseuser",
+            "HOST": "127.0.0.1",
             "PORT": "5432",
         }
     }
@@ -158,20 +177,23 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ],
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #   'rest_framework.permissions.IsAuthenticated',
-    # ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
 
-"""
-NINJA_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=24),  # 24 hours
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # 7 days
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS256",
 }
-"""
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -193,7 +215,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 STATICFILES_FINDERS = [
-    "django.contrib.staticfiles.finders.FileSystemFinder",  # finds files in STATICFILES_DIRS
+    # finds files in STATICFILES_DIRS
+    "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",  # finds static/ in each app
     # "compressor.finders.CompressorFinder",  # keeps compressor integration
 ]
@@ -203,11 +226,12 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 UPLOAD_URL = "/uploads/"
-UPLOAD_PATH = BASE_DIR / UPLOAD_URL
+UPLOAD_PATH = BASE_DIR / "uploads"
 
-DOCUMENT_URL = "/documents/"
+DOCUMENT_URL = "documents"
 DOCUMENTS_ROOT = BASE_DIR / "documents"
 
+VOICE_URL = BASE_DIR / "voices"
 
 # email verification
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

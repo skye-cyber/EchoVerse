@@ -23,13 +23,19 @@ from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.exceptions import NotAuthenticated, ValidationError
 from rest_framework.response import Response
 from django.views.decorators.http import require_GET, require_POST
-from django.http import HttpResponse
 from django.contrib.auth.password_validation import validate_password
-
+from TTSStudio.models import TTSSession
 from django.utils import timezone
 import random
 from datetime import timedelta
-from .utils import send_email_link, send_email_code, send_pr_email, flushSession
+from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import (
+    send_email_link,
+    send_email_code,
+    send_pr_email,
+    flushSession,
+    get_tokens_for_user,
+)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -127,9 +133,18 @@ def UserLogin(request):
         return JsonResponse({"status": "error", "message": "Invalid JSON"}, status=400)
 
     form = AuthenticationForm(request, data=data)
-    if form.is_valid():
-        cd = form.cleaned_data
-        user = authenticate(request, username=cd["username"], password=cd["password"])
+    if form.is_valid() or (data.get("eu") and data.get("password")):
+        cd = form.cleaned_data if form.is_valid() else data
+        eu = cd["eu"]
+        password = cd["password"]
+
+        isEmail = "@" in eu
+
+        user = (
+            authenticate(request, email=eu, password=password)
+            if isEmail
+            else authenticate(request, username=eu, password=password)
+        )
 
         if user is None:
             return JsonResponse(
@@ -149,8 +164,16 @@ def UserLogin(request):
                 }
             )
 
+        # login user (session)
         login(request, user)
-        print("Session Key:", request.session.session_key)
+
+        # issue JWT tokens
+        # refresh = RefreshToken.for_user(user)
+        # access_token = str(refresh.access_token)
+
+        tokens = get_tokens_for_user(user)
+
+        # print("Auth Status:", user.is_authenticated, user.is_anonymous)
         return JsonResponse(
             {
                 "status": "success",
@@ -160,6 +183,12 @@ def UserLogin(request):
                 "redirect": "Dashboard",
                 "auth": user.is_authenticated,
                 "code": status.HTTP_200_OK,
+                "auth_data": {
+                    "username": user.username,
+                    "roles": ["user"],
+                    "access": tokens["access"],
+                    "refresh": tokens["refresh"],
+                },
             }
         )
 
@@ -433,3 +462,31 @@ def CheckUserAuth(request):
                 "code": status.HTTP_401_UNAUTHORIZED,
             }
         )
+
+
+@api_view(["GET"])
+@login_required
+# @ensure_csrf_cookie
+def user_profile(request):
+    c_user = request.user
+    user = User.objects.filter(username=c_user.username).first()
+
+    user_sessions_count = TTSSession.objects.filter(user=user).count()
+
+    roles = []
+    if user.is_superuser:
+        roles.append("admin")
+    elif user.is_staff:
+        roles.append("staff")
+    else:
+        roles.append("user")
+
+    data = {
+        "username": user.username,
+        "email": user.email,
+        "email_verified": user.email_verified,
+        "session_count": user_sessions_count,
+        "roles": roles,
+        "account_status": "Active" if user.is_active else "Deactivated",
+    }
+    return JsonResponse(data=data)

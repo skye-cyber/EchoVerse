@@ -8,7 +8,7 @@ class EchoVerseUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EchoVerseUser
-        fields = ("username", "email", "password1", "password2", "account_type")
+        fields = ("username", "email", "password1", "password2")
 
     def validate(self, data):
         if data["password1"] != data["password2"]:

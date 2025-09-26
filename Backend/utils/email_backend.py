@@ -16,13 +16,13 @@ class Smtp2goAPIContentException(Smtp2goBaseException):
     pass
 
 
-class SomocloudEmailBackend(BaseEmailBackend):
+class EchoVerseUserEmailBackend(BaseEmailBackend):
     """
     smtp2go wrapper for Django's Email Backend with domain validation
     """
 
     def __init__(self, fail_silently=False, **kwargs):
-        super(SomocloudEmailBackend, self).__init__(fail_silently=fail_silently)
+        super(EchoVerseUserEmailBackend, self).__init__(fail_silently=fail_silently)
         self.smtp2go = Smtp2goClient()
         self.lock = RLock()
         # Define a default sender if not provided

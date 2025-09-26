@@ -41,8 +41,6 @@ urlpatterns = [
     # ======= Data Fetch api's======
     path("security/csrf/", set_csrf_token, name="set_csrf"),
     path("user/authentication/", views.CheckUserAuth, name="check_auth"),
-    path("user/profile/", views.GetUserDataView.as_view(), name="fetch_user_profile"),
+    path("user/profile/", views.user_profile, name="fetch_user_profile"),
     path("session/flush/", flushSession, name="flush_session"),
 ]
-
-# path('users', views.UserViewSet, name='fetch-all-users'),
