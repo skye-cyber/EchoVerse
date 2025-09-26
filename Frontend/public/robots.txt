@@ -1,0 +1,15 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Directories
+Disallow: /api/
+Disallow: /admin/
+Disallow: /static/admin/
+
+# Files
+Disallow: /README.md
+Disallow: /package.json
+
+# Sitemap
+Sitemap: https://echoverse.example.com/sitemap.xml

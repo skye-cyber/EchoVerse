@@ -1,13 +1,21 @@
 import api from "./api";
 
 export const authService = {
-  login: async (email, password) => {
-    const response = await api.post("/auth/login/", { email, password });
-    return response.data;
+  login: async (eu, password) => {
+    const response = await api.post("/user/login/", { eu, password });
+    if (response?.status === 200) {
+      const { access, refresh } = response?.data?.auth_data;
+      localStorage.setItem("accessToken", access);
+      localStorage.setItem("refreshToken", refresh);
+
+      return response.data.auth_data;
+    } else {
+      return response;
+    }
   },
 
   register: async (userData) => {
-    const response = await api.post("/auth/register/", userData);
+    const response = await api.post("/user/register/", userData);
     return response.data;
   },
 
@@ -15,7 +23,7 @@ export const authService = {
     const refreshToken = localStorage.getItem("refreshToken");
     if (refreshToken) {
       try {
-        await api.post("/auth/logout/", { refresh: refreshToken });
+        await api.post("/user/logout/", { refresh: refreshToken });
       } catch (error) {
         console.error("Logout error:", error);
       }
@@ -25,12 +33,13 @@ export const authService = {
   },
 
   getProfile: async () => {
-    const response = await api.get("/auth/profile/");
+    const response = await api.get("/user/profile/");
+    console.log(response);
     return response.data;
   },
 
   updateProfile: async (profileData) => {
-    const response = await api.put("/auth/profile/", profileData);
+    const response = await api.put("/user/profile/update", profileData);
     return response.data;
   },
 
@@ -51,5 +60,15 @@ export const authService = {
       new_password: newPassword,
     });
     return response.data;
+  },
+
+  refreshToken: async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    const response = await api.post("/api/token/refresh/", {
+      refresh: refreshToken,
+    });
+
+    localStorage.setItem("accessToken", response.data.access);
+    return response.data.access;
   },
 };

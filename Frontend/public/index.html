@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#6366f1" />
+    <meta
+      name="description"
+      content="EchoVerse - AI-Powered Text-to-Speech with natural, human-like voices. Convert text to speech instantly with advanced neural networks."
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-strict-origin-when-cross-origin"
+    />
+
+    <title>
+      EchoVerse - AI Text to Speech Converter | Natural Voice Generation
+    </title>
+
+    <!-- Structured data for SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "EchoVerse",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web Browser",
+        "description": "Advanced AI-powered Text-to-Speech converter with neural network technology for natural sounding voices",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "EchoVerse"
+        },
+        "featureList": "Text-to-Speech, AI Voices, Real-time Conversion, Multiple Languages"
+      }
+    </script>
+
+    <style>
+      /* Modern CSS Reset */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Critical CSS for instant loading */
+      body {
+        margin: 0;
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: #f1f5f9;
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+
+      /* Modern loading animation */
+      #loading-wrapper {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(
+          135deg,
+          #6366f1 0%,
+          #8b5cf6 50%,
+          #d946ef 100%
+        );
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease infinite;
+        z-index: 9999;
+        transition:
+          opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .loading-content {
+        text-align: center;
+        position: relative;
+        z-index: 2;
+      }
+
+      .logo-container {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+      }
+
+      .logo-main {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 10px 30px rgba(99, 102, 241, 0.4));
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .logo-orbits {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 140px;
+        height: 140px;
+      }
+
+      .orbit {
+        position: absolute;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: orbit 4s linear infinite;
+      }
+
+      .orbit-1 {
+        width: 100%;
+        height: 100%;
+        animation-delay: 0s;
+      }
+      .orbit-2 {
+        width: 80%;
+        height: 80%;
+        animation-delay: -1s;
+      }
+      .orbit-3 {
+        width: 60%;
+        height: 60%;
+        animation-delay: -2s;
+      }
+
+      .loading-progress {
+        width: 200px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        margin: 2rem auto;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #f0abfc, #a5b4fc);
+        border-radius: 10px;
+        width: 0%;
+        animation: loadingProgress 2s ease-in-out infinite;
+        transition: width 0.3s ease;
+      }
+
+      .loading-text {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .loading-subtext {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1rem;
+        font-weight: 400;
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
+      .tech-badges {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .tech-badge {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Background particles */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: floatParticle 6s ease-in-out infinite;
+      }
+
+      /* Animations */
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) scale(1);
+        }
+        50% {
+          transform: translateY(-10px) scale(1.05);
+        }
+      }
+
+      @keyframes orbit {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes loadingProgress {
+        0% {
+          width: 0%;
+        }
+        50% {
+          width: 70%;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+
+      @keyframes floatParticle {
+        0%,
+        100% {
+          transform: translateY(0px) translateX(0px);
+        }
+        25% {
+          transform: translateY(-20px) translateX(10px);
+        }
+        50% {
+          transform: translateY(-10px) translateX(20px);
+        }
+        75% {
+          transform: translateY(-30px) translateX(-10px);
+        }
+      }
+
+      /* Hide loading screen when React loads */
+      .react-loaded #loading-wrapper {
+        opacity: 0;
+        transform: scale(1.1);
+        pointer-events: none;
+      }
+
+      /* No JavaScript fallback */
+      .no-js-message {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #0f172a;
+        color: #f1f5f9;
+        z-index: 10000;
+        padding: 2rem;
+        text-align: center;
+      }
+
+      .no-js-message h2 {
+        color: #ef4444;
+        margin-bottom: 1rem;
+      }
+
+      .no-js-message p {
+        margin-bottom: 1rem;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .no-js-message code {
+        background: #1e293b;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .no-js .no-js-message {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .no-js #loading-wrapper {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="no-js">
+    <!-- No JavaScript message -->
+    <div class="no-js-message">
+      <div style="max-width: 500px; padding: 2rem">
+        <div style="font-size: 4rem; margin-bottom: 1rem">🔊</div>
+        <h2 style="font-size: 2rem; margin-bottom: 1rem; color: #f0abfc">
+          JavaScript Required
+        </h2>
+        <p style="margin-bottom: 1.5rem; line-height: 1.6">
+          EchoVerse uses advanced AI technology that requires JavaScript to
+          function properly.
+        </p>
+        <div
+          style="
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+          "
+        >
+          <p style="margin-bottom: 1rem; font-weight: 600">
+            To enable JavaScript:
+          </p>
+          <ul style="text-align: left; margin-left: 2rem">
+            <li>
+              Chrome: Settings → Privacy and Security → Site Settings →
+              JavaScript
+            </li>
+            <li>
+              Firefox: Preferences → Privacy & Security → Permissions → Enable
+              JavaScript
+            </li>
+            <li>Safari: Preferences → Security → Enable JavaScript</li>
+          </ul>
+        </div>
+        <button
+          onclick="location.reload()"
+          style="
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+          "
+        >
+          Reload After Enabling JavaScript
+        </button>
+      </div>
+    </div>
+
+    <!-- Modern loading screen -->
+    <div id="loading-wrapper">
+      <div class="particles" id="particles-container"></div>
+      <div class="loading-content">
+        <div class="logo-container">
+          <div class="logo-orbits">
+            <div class="orbit orbit-1"></div>
+            <div class="orbit orbit-2"></div>
+            <div class="orbit orbit-3"></div>
+          </div>
+          <svg
+            class="logo-main"
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient
+                id="logoGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stop-color="#f0abfc" />
+                <stop offset="100%" stop-color="#a5b4fc" />
+              </linearGradient>
+            </defs>
+            <path
+              d="M30 35 Q50 15 70 35 T90 55"
+              stroke="url(#logoGradient)"
+              stroke-width="4"
+              fill="none"
+              stroke-linecap="round"
+            />
+            <path
+              d="M30 55 Q50 75 70 55"
+              stroke="url(#logoGradient)"
+              stroke-width="4"
+              fill="none"
+              stroke-linecap="round"
+            />
+            <circle cx="35" cy="35" r="6" fill="url(#logoGradient)" />
+            <circle cx="65" cy="35" r="6" fill="url(#logoGradient)" />
+            <path
+              d="M40 55 L60 55"
+              stroke="url(#logoGradient)"
+              stroke-width="3"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
+
+        <div class="loading-text">Initializing EchoVerse</div>
+        <div class="loading-subtext">
+          Loading AI neural networks and voice models...
+        </div>
+
+        <div class="loading-progress">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="tech-badges">
+          <span class="tech-badge">AI Neural Networks</span>
+          <span class="tech-badge">Real-time Processing</span>
+          <span class="tech-badge">Natural Voices</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- React root element -->
+    <div id="root"></div>
+
+    <!-- Modern loading script -->
+    <script>
+      // Remove no-js class and handle loading
+      document.body.classList.remove("no-js");
+
+      // Create background particles
+      function createParticles() {
+        const container = document.getElementById("particles-container");
+        const particleCount = 15;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+
+          // Random properties
+          const size = Math.random() * 4 + 1;
+          const posX = Math.random() * 100;
+          const posY = Math.random() * 100;
+          const delay = Math.random() * 6;
+          const duration = Math.random() * 4 + 4;
+
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${posX}%`;
+          particle.style.top = `${posY}%`;
+          particle.style.animationDelay = `${delay}s`;
+          particle.style.animationDuration = `${duration}s`;
+          particle.style.opacity = Math.random() * 0.6 + 0.2;
+
+          container.appendChild(particle);
+        }
+      }
+
+      // Simulate progressive loading
+      function simulateLoading() {
+        const progressBar = document.getElementById("progress-bar");
+        let progress = 0;
+
+        const interval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+          }
+          progressBar.style.width = `${progress}%`;
+        }, 200);
+      }
+
+      // Initialize when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        createParticles();
+        simulateLoading();
+
+        // Hide loading screen when React mounts
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            document.body.classList.add("react-loaded");
+
+            // Remove loading screen from DOM after animation
+            setTimeout(function () {
+              const loadingWrapper = document.getElementById("loading-wrapper");
+              if (loadingWrapper) {
+                loadingWrapper.remove();
+              }
+            }, 600);
+          }, 2500);
+        });
+      });
+
+      // Service Worker registration for PWA
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker
+            .register("%PUBLIC_URL%/sw.js")
+            .then(function (registration) {
+              console.log("EchoVerse SW registered: ", registration.scope);
+            })
+            .catch(function (registrationError) {
+              console.log(
+                "EchoVerse SW registration failed: ",
+                registrationError,
+              );
+            });
+        });
+      }
+
+      // Add some interactive feedback
+      document.addEventListener("mousemove", function (e) {
+        const particles = document.querySelectorAll(".particle");
+        particles.forEach((particle) => {
+          const speed = 0.02;
+          const x = (e.clientX * speed) % 100;
+          const y = (e.clientY * speed) % 100;
+          particle.style.transform = `translate(${x}px, ${y}px)`;
+        });
+      });
+    </script>
+  </body>
+</html>

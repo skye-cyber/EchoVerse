@@ -72,7 +72,7 @@ const TextInput = ({ onTextSubmit, onFileUpload, isLoading }) => {
             onChange={(e) => setText(e.target.value)}
             onPaste={handlePaste}
             rows={6}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 text-slate-800 dark:text-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             placeholder="Type or paste your text here..."
             disabled={isLoading}
           />
