@@ -10,6 +10,7 @@ from rest_framework.decorators import api_view
 from django.http import HttpResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta, datetime, timezone
+from rest_framework import status
 
 
 def get_tokens_for_user(user):

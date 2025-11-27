@@ -10,7 +10,7 @@ import os
 import glob
 import torch
 from datetime import datetime
-from TTSStudio.models import Voice
+from TTSStudio.models import Voice, TTSModel
 from datetime import timedelta
 from rest_framework_simplejwt.tokens import RefreshToken
 from pydub import AudioSegment
@@ -198,3 +198,31 @@ def chunk_text(text, max_tokens=300, separator=" "):
     if current.strip():
         chunks.append(current.strip())
     return chunks
+
+
+def populate_voicesMD():
+    from ttskit3.get_model import SuperTTS
+
+    tts_model, created = TTSModel.objects.get_or_create(
+        name="kitten-nano",
+        language="en-us",
+        gender="neutral",
+        is_premium=False,
+    )
+    voices = SuperTTS().available_voices
+    voices.append("null-voice")
+    for voice in voices:
+        Voice.objects.get_or_create(
+            tts_model=tts_model,
+            name=voice,
+            language="en-us",
+            gender="female"
+            if voice.endswith("f")
+            else "male"
+            if voice.endswith("f")
+            else "neutral",
+        )
+
+
+# populate_voices()
+# populate_voicesMD()

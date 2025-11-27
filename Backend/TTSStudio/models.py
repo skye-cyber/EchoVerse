@@ -6,7 +6,11 @@ import os
 
 class TTSModel(BaseModel, models.Model):
     name = models.CharField(max_length=100)
-    language = models.CharField(default="en-us", max_length=50)
+    language = models.CharField(
+        default="en-us",
+        choices=[("en-us", "english-us"), ("en-br", "english-britain")],
+        max_length=50,
+    )
     gender = models.CharField(
         max_length=10, choices=[("male", "Male"), ("female", "Female")]
     )
@@ -15,26 +19,36 @@ class TTSModel(BaseModel, models.Model):
 
 class Voice(BaseModel, models.Model):
     name = models.CharField(max_length=100)
+    tts_model = models.ForeignKey(
+        to="TTSModel",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="model_voice_owner",
+    )
     language = models.CharField(
         default="en-us",
         choices=[("en-us", "english-us"), ("en-br", "english-britain")],
         max_length=50,
     )
-    file = models.FileField(upload_to="voices/")
+    file = models.FileField(upload_to="voices/", null=True, blank=True)
     gender = models.CharField(
-        max_length=10, choices=[("male", "Male"), ("female", "Female")]
+        max_length=10,
+        choices=[("male", "Male"), ("female", "Female"), ("neutral", "Neutral")],
     )
     is_premium = models.BooleanField(default=False)
 
+    """
     def save(self, *args, **kwargs):
         if not self.file:
             raise Exception("Path to the voice file is required.")
-        """Override save to ensure unique ID is generated if not already set."""
+        Override save to ensure unique ID is generated if not already set.
         # if Path(self.file.path).parent.is_relative_to(settings.BASE_DIR / "voices"):
         super().save(*args, **kwargs)
         # else:
         #   print(self.file)
         #  raise Exception("Voice file must be in the voices directory")
+    """
 
 
 class TTSSession(models.Model):
@@ -48,6 +62,15 @@ class TTSSession(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+    )
+    ttsmodel_size = models.CharField(
+        max_length=30,
+        default="Medium",
+        choices=[
+            ("large", "Large"),
+            ("medium", "Medium"),
+            ("small", "Small"),
+        ],
     )
     input_text = models.TextField()
     text_length = models.BigIntegerField(null=True, blank=True)

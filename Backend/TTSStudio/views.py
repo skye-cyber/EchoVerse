@@ -29,6 +29,7 @@ from .utils import allowed_file, extract_text_from_file
 from .serializers import TTSSessionSerializer, TTSModelSerializer, VoiceSerializer
 import warnings
 from .task_handler import process_text
+from .processor import Processor
 
 warnings.filterwarnings("ignore")
 
@@ -188,12 +189,20 @@ class TextTTSfy(APIView):
         speed = float(request.data.get("speed", 1.0))
         pitch = float(request.data.get("pitch", 1.0))
         energy = float(request.data.get("energy", 1.0))
+        model = str(request.data.get("model", 1.0))
 
         if not text:
             return JsonResponse({"error": "Missing 'text' field"}), 400
 
-        MODEL = TTSModel.objects.get(name="DEFAULT_TTS_MODEL")
+        MODEL = TTSModel.objects.get(name=model)
 
+        _voice = (
+            Voice.objects.filter(name="null-voice").first()
+            if voice == "default"
+            else Voice.objects.filter(id=voice).first()
+        )
+
+        print(model, MODEL.name, voice, _voice.name)
         # Save to session history if user is authenticated
         session, created = TTSSession.objects.get_or_create(
             user=request.user,
@@ -201,14 +210,17 @@ class TextTTSfy(APIView):
             speed=speed,
             model=MODEL,
             energy=energy,
+            voice=_voice,
             pitch=pitch,
+            # ttsmodel_size=model,
         )
         if created:
             session.save()
 
         print(f"\033[33mDispatched task {session.id}\033[0m")
+
         # Call the background celery task handler
-        process_text.delay(session.id)
+        process_text.delay(session.id, model=MODEL.name)
 
         return Response({"task_id": session.id, "status": "processing"})
 
@@ -229,6 +241,7 @@ def FileTTSfy(request):
     speed = float(request.data["speed"] or 1.0)
     pitch = float(request.data["pitch"] or 1.0)
     energy = float(request.data["energy"] or 1.0)
+    model = str(request.data.get("model", 1.0))
 
     # Check if a file was uploaded
     if "file" in request.files:
@@ -262,7 +275,9 @@ def FileTTSfy(request):
     if not text:
         return JsonResponse({"error": "No text provided"}), 400
 
-    MODEL = TTSModel.objects.get(name="DEFAULT_TTS_MODEL")
+    MODEL = TTSModel.objects.get(name=model)
+
+    _voice = Voice.objects.filter(id=voice).first()
 
     # Save to session history if user is authenticated
     session = TTSSession.objects.get_or_create(
@@ -270,12 +285,14 @@ def FileTTSfy(request):
         input_text=text,
         speed=speed,
         model=MODEL,
+        voice=_voice,
+        # ttsmodel_size=model,
         energy=energy,
         pitch=pitch,
     )
 
     # Call the background celery task handler
-    process_text.delay(session.id)
+    process_text.delay(session.id, model=MODEL.name)
 
     return Response({"task_id": session.id, "status": "processing"})
 
@@ -345,10 +362,12 @@ def tts_api(request):
             return JsonResponse({"error": "Text is required"}, status=400)
 
         # Generate audio
-        audio_buffer = ttsfy(text, voice, speed)
+        audio_file = Processor(text, voice, speed, threads=-1).MultiThreadedProcessor()
 
         # Return audio file
-        response = HttpResponse(audio_buffer.getvalue(), content_type="audio/wav")
+        response = HttpResponse(
+            open(audio_file, "rb").getvalue(), content_type="audio/wav"
+        )
         response["Content-Disposition"] = (
             f'attachment; filename="tts_output_{voice}.wav"'
         )
@@ -365,14 +384,15 @@ def list_voices(request):
     data = Voice.objects.all()
     voices = []
     for voice in data:
-        voices.append(
-            {
-                "id": voice.id,
-                "name": voice.name,
-                "is_premium": voice.is_premium,
-                "language": voice.language,
-            }
-        )
+        if voice.name.startswith("expr"):
+            voices.append(
+                {
+                    "id": voice.id,
+                    "name": voice.name,
+                    "is_premium": voice.is_premium,
+                    "language": voice.language,
+                }
+            )
     return JsonResponse({"voices": voices})
 
 

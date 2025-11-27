@@ -10,6 +10,8 @@ from .utils import (
     chunk_text,
 )
 import logging
+from ttskit3 import SuperTTS
+import soundfile as sf
 
 log = logging.getLogger("EchoVerse")
 
@@ -26,19 +28,39 @@ class Processor:
         threads (int): Number of threads to use for parallel processing.
     """
 
-    def __init__(self, text, voice, speed=1.0, pitch=1.0, energy=1.0, threads: int = 1):
+    def __init__(
+        self,
+        text,
+        voice,
+        speed=1.0,
+        pitch=1.0,
+        energy=1.0,
+        threads: int = 1,
+        model="Large",
+    ):
         self.text = text
         self.voice = voice
         self.speed = speed
         self.pitch = pitch
         self.energy = energy
-        self.threads = threads
+        self.threads = threads if threads > 0 else cpu_count() - 1
         self.chunks = chunk_text(self.text)
         self.output_file = generate_filename(relative=True)
-        from .initializer import hifi_gan, fastspeech2
 
-        self.hifi_gan = hifi_gan
-        self.fastspeech2 = fastspeech2
+        if model.upper() == "DEFAULT_TTS_MODEL":
+            from .initializer import hifi_gan, fastspeech2
+
+            self.hifi_gan = hifi_gan
+            self.fastspeech2 = fastspeech2
+
+        self.model = model
+        self.Tmethod = (
+            self.ttsfyLG
+            if self.model.upper() == "DEFAULT_TTS_MODEL"
+            else self.ttsfyMD
+            if self.model.lower() == "kitten-nano"
+            else self.ttsfySM
+        )
 
     def MultiThreadedProcessor(self):
         """Process text input into speech safely with optional multithreading.
@@ -58,10 +80,10 @@ class Processor:
             with ThreadPoolExecutor(max_workers=self.threads) as executor:
                 futures = {
                     executor.submit(
-                        self.ttsfy,
+                        self.Tmethod,
                         chunk,
-                        self.speed,
                         f"{self.output_file.split('.')[0]}-tmp-{i}.wav",
+                        i,
                     ): i
                     for i, chunk in enumerate(self.chunks, start=1)
                 }
@@ -80,17 +102,6 @@ class Processor:
                     except Exception as e:
                         # raise
                         log.exception(f"\033[31mError in chunk {i}\033[0m: {e}")
-        else:
-            # single-thread fallback
-            for i, chunk in enumerate(
-                tqdm(self.chunks, desc="Chunk", leave=False), start=1
-            ):
-                try:
-                    tmp_name = f"{self.output_file.split('.')[0]}-tmp-{i}.wav"
-                    self.ttsfy(chunk, tmp_name)
-                    tmp_files.append(tmp_name)
-                except Exception as e:
-                    log.exception(f"\033[31mError in chunk {i}\033[0m: {e}")
 
         # Merge or rename results
         if tmp_files:
@@ -114,7 +125,7 @@ class Processor:
         for i, chunk in enumerate(pbar, start=1):
             try:
                 tmp_name = f"{self.output_file.split('.')[0]}-tmp-{i}.wav"
-                self.ttsfy(chunk, tmp_name)
+                self.Tmethod(chunk, tmp_name, 0)
                 tmp_files.append(tmp_name)
             except Exception as e:
                 log.error(f"\033[31mError in chunk {i}\033[0m: {e}")
@@ -130,7 +141,7 @@ class Processor:
 
         return self.output_file if self.output_file else {"Error": ""}
 
-    def ttsfy(self, text, filename) -> Path:  # io.BytesIO:
+    def ttsfyLG(self, text, output_file, index) -> Path:
         # Convert text to mel-spectrogram
         mel_output, _, _, _ = self.fastspeech2.encode_text(
             [text],
@@ -144,8 +155,25 @@ class Processor:
 
         # Save to memory (instead of disk)
         # buffer = io.BytesIO()
-        torchaudio.save(filename, waveform.squeeze(1).cpu(), 22050, format="wav")
+        torchaudio.save(output_file, waveform.squeeze(1).cpu(), 22050, format="wav")
         # buffer.seek(0)
 
         # Return as file
-        return filename
+        return output_file
+
+    def ttsfyMD(self, chunk, output_file, index) -> Path:
+        # print(f"[+] Processing chunk \033[1;34m{index} / {len(self.chunks)}\033[0m: {chunk[:50]}...")
+
+        instance = SuperTTS()
+
+        audio = instance.generate(
+            chunk,
+            self.voice if self.voice in instance.available_voices else "expr-voice-3-m",
+            self.speed,
+        )
+        sf.write(output_file, audio, 24000)
+
+        return output_file
+
+    def ttsfySM(self, text, filename) -> Path:
+        pass

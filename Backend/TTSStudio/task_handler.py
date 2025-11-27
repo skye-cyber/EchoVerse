@@ -14,22 +14,36 @@ log = logging.getLogger("EchoVerse")
     autoretry_for=(Exception,),
     retry_kwargs={"max_retries": 3, "countdown": 10},
 )
-def process_text(self, sess_id):
+def process_text(self, sess_id, model="kitten-nano"):
     session = TTSSession.objects.get(id=sess_id)
     session.status = "processing"
     session.error_message = None
     session.save(update_fields=["status", "error_message"])
 
     try:
-        log.info(f"📄 Starting ssid: {session.id}")
+        log.info(f"📄 Starting ssid: {session.id} - Model:{model}")
 
-        file_result = Processor(
-            session.input_text,
-            session.voice or "default",
-            session.speed,
-            session.pitch,
-            session.energy,
-        ).SingleThreadProcessor()
+        if model.lower() == "DEFAULT_TTS_MODEL":
+            log.debug("Using DEFAULT_TTS_MODEL")
+            file_result = Processor(
+                session.input_text,
+                session.voice or "default",
+                session.speed,
+                session.pitch,
+                session.energy,
+                model=model,
+            ).SingleThreadProcessor()
+        elif model.lower() == "kitten-nano":
+            log.debug("Using kitten-nano")
+            file_result = Processor(
+                session.input_text,
+                session.voice.name,
+                session.speed,
+                session.pitch,
+                session.energy,
+                threads=-1,
+                model=model,
+            ).MultiThreadedProcessor()
 
         with open(file_result, "rb") as f:
             session.audio_file.save(os.path.basename(file_result), File(f), save=False)
