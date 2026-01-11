@@ -2,15 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#6366f1" />
     <meta
       name="description"
       content="EchoVerse - AI-Powered Text-to-Speech with natural, human-like voices. Convert text to speech instantly with advanced neural networks."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
 
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -471,6 +471,9 @@
     <!-- React root element -->
     <div id="root"></div>
 
+    <!-- Load React application -->
+    <script type="module" src="/main.jsx"></script>
+
     <!-- Modern loading script -->
     <script>
       // Remove no-js class and handle loading
@@ -544,7 +547,7 @@
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
           navigator.serviceWorker
-            .register("%PUBLIC_URL%/sw.js")
+            .register("/sw.js")
             .then(function (registration) {
               console.log("EchoVerse SW registered: ", registration.scope);
             })

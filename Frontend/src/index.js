@@ -13,13 +13,15 @@ const hideLoadingScreen = () => {
     }, 500);
   }
 };
-
+try{
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
-
+}catch(err){
+    console.log(err)
+}
 // Hide loading screen after React is rendered
 setTimeout(hideLoadingScreen, 1000);

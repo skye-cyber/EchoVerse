@@ -61,8 +61,8 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend (default port)
-    "http://localhost:3001",  # React frontend (custom port)
+    "http://localhost:3000",  # Vite frontend (default port)
+    "http://localhost:3001",  # Vite frontend (alternative port)
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
     "http://192.168.43.234:3000",
