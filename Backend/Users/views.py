@@ -64,7 +64,7 @@ class SignupAPIView(APIView):
                 }
             )
         if data.get("email", None):
-            if EchoVerseUser.objects.filter(email=data["Email"]).exists():
+            if EchoVerseUser.objects.filter(email=data["email"]).exists():
                 return JsonResponse(
                     {
                         "status": "fail",

@@ -46,7 +46,8 @@ const Register = () => {
       });
       navigate("/dashboard");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to create account");
+        console.log(err)
+      setError(err.response?.data?.message ||err.message|| "Failed to create account");
     } finally {
       setLoading(false);
     }
@@ -100,7 +101,7 @@ const Register = () => {
                 htmlFor="name"
                 className="flex text-sm font-medium text-gray-700"
               >
-                Username <span class="flex text-red-500 ml-1">*</span>
+                Username <span className="flex text-red-500 ml-1">*</span>
               </label>
               <input
                 id="username"
@@ -139,7 +140,7 @@ const Register = () => {
                 htmlFor="password1"
                 className="flex text-sm font-medium text-gray-700"
               >
-                Password <span class="flex text-red-500 ml-1">*</span>
+                Password <span className="flex text-red-500 ml-1">*</span>
               </label>
               <input
                 id="password1"
@@ -159,7 +160,7 @@ const Register = () => {
                 htmlFor="password2"
                 className="flex text-sm font-medium text-gray-700"
               >
-                Confirm Password <span class="flex text-red-500 ml-1">*</span>
+                Confirm Password <span className="flex text-red-500 ml-1">*</span>
               </label>
               <input
                 id="password2"

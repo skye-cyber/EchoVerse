@@ -42,7 +42,6 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (eu, password) => {
     const response = await authService.login(eu, password);
-
     if (response.access) {
       const { username, roles, access, refresh } = response;
       localStorage.setItem("accessToken", access);

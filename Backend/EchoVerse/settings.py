@@ -10,8 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-# import os
-import sys
 from pathlib import Path
 
 from datetime import timedelta
@@ -31,7 +29,7 @@ SECRET_KEY = "django-insecure-4apel#e+*3a5$p(@m8n=3ahuh2%o3_59f#5r_2onygr_z)*cu+
 DEBUG = True
 
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.43.234", "0.0.0.0"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.100.1", "0.0.0.0"]
 
 try:
     ip = socket.gethostbyname(socket.gethostname())
@@ -63,10 +61,30 @@ SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
 SESSION_SAVE_EVERY_REQUEST = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3001",  # React frontend
+    "http://localhost:3000",  # React frontend (default port)
+    "http://localhost:3001",  # React frontend (custom port)
+    "http://127.0.0.1:3000",
     "http://127.0.0.1:3001",
+    "http://192.168.43.234:3000",
     "http://192.168.43.234:3001",
 ]
+
+# Allow all headers and methods for development
+CORS_ALLOW_ALL_HEADERS = True
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Allow credentials (cookies, authorization headers)
+CORS_ALLOW_CREDENTIALS = True
+
+# Expose headers that frontend might need
+CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
@@ -99,13 +117,13 @@ AUTH_USER_MODEL = "Users.EchoVerseUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "EchoVerse.urls"
@@ -137,13 +155,14 @@ AUTHENTICATION_BACKENDS = [
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-if "test" in sys.argv:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "sqlite3.db",
-        }
+# if "test" in sys.argv:
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "sqlite3.db",
     }
+}
+'''
 else:
     DATABASES = {
         "default": {
@@ -155,7 +174,7 @@ else:
             "PORT": "5432",
         }
     }
-
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -4,6 +4,8 @@ export const authService = {
   login: async (eu, password) => {
     const response = await api.post("/user/login/", { eu, password });
     if (response?.status === 200) {
+        if(!response.data.auth_data) return response.data
+
       const { access, refresh } = response?.data?.auth_data;
       localStorage.setItem("accessToken", access);
       localStorage.setItem("refreshToken", refresh);

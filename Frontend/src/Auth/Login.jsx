@@ -34,6 +34,7 @@ const Login = () => {
     } catch (err) {
       setError(
         err?.data?.message ||
+        err.message||
           err?.data ||
           err?.response?.statusText ||
           err?.response?.status ||
