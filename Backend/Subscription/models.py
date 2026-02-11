@@ -13,3 +13,4 @@ class Subscription(models.Model):
     characters_used = models.IntegerField(default=0)
     characters_limit = models.IntegerField()
     renews_on = models.DateField()
+

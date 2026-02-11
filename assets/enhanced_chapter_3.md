@@ -204,7 +204,7 @@ class UserProfile(models.Model):
     api_key = models.CharField(max_length=64, unique=True)
     subscription_plan = models.CharField(max_length=20)
     usage_stats = models.JSONField(default=dict)
-    
+
     def generate_api_key(self):
         return secrets.token_urlsafe(32)
 ```
@@ -289,12 +289,12 @@ pie
 class TestTTSProcessor(unittest.TestCase):
     def setUp(self):
         self.processor = TTSProcessor(MockModelRegistry())
-    
+
     def test_text_tokenization(self):
         tokens = self.processor.tokenize("Hello world")
         self.assertEqual(len(tokens), 2)
         self.assertIn("hello", tokens)
-    
+
     def test_model_selection(self):
         model = self.processor.select_model("en_female")
         self.assertIsNotNone(model)
@@ -307,7 +307,7 @@ class TestTTSAPI(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user('test', 'test@example.com')
         self.client.force_authenticate(user=self.user)
-    
+
     def test_tts_endpoint(self):
         response = self.client.post('/api/tts/', {
             'text': 'Test text',
@@ -406,22 +406,7 @@ describe('Voice Studio', () => {
 ### 3.7.2 Development Environment Setup
 
 ```bash
-# Backend Development Environment
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements-dev.txt
-pre-commit install
-python manage.py migrate
-python manage.py runserver
 
-# Frontend Development Environment
-npm install
-npm run dev
-
-# Testing Environment
-pytest --cov=backend --cov-report=html
-npm test
-cypress run
 ```
 
 ## 3.8 Challenges and Solutions
