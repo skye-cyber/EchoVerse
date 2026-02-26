@@ -92,9 +92,12 @@ services:
 
 ---
 
+## Conceptual Framework Overview
+![Conceptual Framework](./assets/ConceptualFramework.png "ConceptualFramework")
+
 ## 🏗️ Architecture Overview
 
-![Architecture](./architecture.png "Architecture")
+![Architecture](./assets/architecture.png "Architecture")
 
 ### Tech Stack Deep Dive
 
