@@ -99,6 +99,9 @@ services:
 
 ![Architecture](./assets/architecture.png "Architecture")
 
+## DataFlow
+![DataFlow](./assets/DataFlow.png "DataFlow")
+
 ### Tech Stack Deep Dive
 
 #### Frontend (Modern React)
