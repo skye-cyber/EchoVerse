@@ -128,7 +128,7 @@ services:
 ## 🎨 User Experience
 
 ### Voice Studio Dashboard
-![Dashboard Preview](https://via.placeholder.com/800x400/1e293b/ffffff?text=Voice+Studio+Dashboard)
+![Dashboard Preview](Dashboard.png "Dashboard.png")
 
 - **Session Management**: Organize and categorize your TTS projects
 - **Real-time Audio Player**: Advanced controls with waveform visualization
