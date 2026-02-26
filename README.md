@@ -128,12 +128,14 @@ services:
 ## 🎨 User Experience
 
 ### Voice Studio Dashboard
-![Dashboard Preview](Dashboard.png "Dashboard.png")
-
+![Dashboard Preview](./assets/Dashboard.png "Dashboard.png")
 - **Session Management**: Organize and categorize your TTS projects
 - **Real-time Audio Player**: Advanced controls with waveform visualization
 - **Batch Operations**: Process multiple texts simultaneously
 - **Smart Search**: AI-powered content discovery
+
+### Task Managaement
+![TaskManager](./assets/TaskManager.png "TaskManager")
 
 ### Advanced Editor
 ```javascript
